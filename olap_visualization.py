@@ -7,18 +7,44 @@ from datetime import datetime
 import numpy as np
 import os
 
+# Hide the menu button
+st.set_page_config(
+    page_title="OLAP Dashboard",
+    page_icon="📊",
+    layout="wide",
+    initial_sidebar_state="expanded",
+    menu_items=None
+)
+
+# Hide Streamlit style
+hide_st_style = """
+<style>
+#MainMenu {visibility: hidden;}
+footer {visibility: hidden;}
+</style>
+"""
+st.markdown(hide_st_style, unsafe_allow_html=True)
+
 def create_db_connection():
-    """Create connection to PostgreSQL database"""
+    """
+    Create database connection using environment variables
+    """
     try:
-        username = 'postgres'
-        password = '531'
-        host = 'localhost'
-        database = 'dwh_cw_001443'
-        connection_string = f'postgresql://{username}:{password}@{host}:{5432}/{database}'
+        # Get database credentials from environment variables
+        db_user = os.getenv('DB_USER', 'postgres')
+        db_password = os.getenv('DB_PASSWORD', '531')
+        db_host = os.getenv('DB_HOST', 'localhost')
+        db_name = os.getenv('DB_NAME', 'dwh_cw_001443')
+        db_port = os.getenv('DB_PORT', '5432')
+
+        # Create connection string
+        connection_string = f'postgresql://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}'
+        
+        # Create engine
         engine = create_engine(connection_string)
         return engine
     except Exception as e:
-        st.error(f"Database connection error: {str(e)}")
+        st.error(f"Error connecting to database: {str(e)}")
         return None
 
 def load_data_from_dwh():
@@ -68,14 +94,6 @@ def olap_visualization():
     """
     Main function to create and display OLAP operations dashboard
     """
-    # Configure the page
-    st.set_page_config(
-        page_title="OLAP Operations Dashboard",
-        page_icon="📊",
-        layout="wide",
-        initial_sidebar_state="expanded"
-    )
-
     # Add custom CSS for better appearance
     st.markdown("""
         <style>
